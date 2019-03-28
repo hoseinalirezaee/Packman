@@ -1,34 +1,43 @@
 #pragma once
 #include <vector>
+#include <string>
 namespace core
 {
 	namespace search
 	{
-		template <class T>
-		class ITreeNode
+		class TreeNode
 		{
+			int remainingSeed;
+			std::vector<TreeNode *> children;
+			TreeNode *parent;
+			std::string name;
 
 		public:
-			virtual std::vector<ITreeNode> getChildren() = 0;
-			virtual T getContent() = 0;
+			TreeNode();
+			
+			void setName(std::string name);
+			void setRemainingSeed(int seeds);
+			void addChild(TreeNode *child);
+			
+			std::string getName() const;
+			int getRemainingSeed() const;
+			TreeNode *getParent() const;
+			std::vector<TreeNode *> getChildren() const;
+
+		private:
+			void setParent(TreeNode *parent);
 		};
 
 		class Solver
 		{
+		private:
+			static bool isGoal(TreeNode *node);
 		public:
-			template <class T>
-			static ITreeNode<T> DFS(ITreeNode<T> root);
+			
+			static TreeNode* BFS(TreeNode *root);
+			static TreeNode *DFS(TreeNode *root);
 		};
 
-		
-
-		
-
-		template<class T>
-		inline ITreeNode<T> Solver::DFS(ITreeNode<T> root)
-		{
-			return ITreeNode<T>();
-		}
 
 	}
 }
