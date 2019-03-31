@@ -1,110 +1,177 @@
 #include "search.h"
+#include "lists.h"
 #include <queue>
-#include <stack>
 
-using namespace core::search;
+using namespace search;
+using namespace components;
 
-bool core::search::Solver::isGoal(TreeNode *node)
+ActionSequence search::SearchAgent::generalSearch(Problem problem, List * list)
 {
-	if (node->getRemainingSeed() == 0)
-	{
-		return true;
-	}
-	return false;
-}
+	TreeNode root;
+	root.setState(problem.getInitialState());
+	list->push(&root);
 
-TreeNode* Solver::BFS(TreeNode *root)
-{
-	std::queue<TreeNode *> fifoList;
-	fifoList.push(root);
-
-	while (!fifoList.empty())
+	while (!list->empty())
 	{
-		TreeNode *front = fifoList.front();
-		fifoList.pop();
-		if (isGoal(front))
+		TreeNode *front = list->pop();
+
+		if (problem.isGoal(front->getState()))
 		{
-			return front;
+			return extractActionSequnce(front);
 		}
 		else
 		{
-			std::vector<TreeNode *> children = front->getChildren();
-			for (auto i = children.begin(); i != children.end(); i++)
-			{
-				fifoList.push(*i);
-			}
+			expandNode(list, problem, front);
 		}
 	}
-	return nullptr;
+	return ActionSequence();
 }
 
-TreeNode * core::search::Solver::DFS(TreeNode * root)
+ActionSequence SearchAgent::BFS(Problem problem)
 {
-	std::stack<TreeNode *> lifoList;
-	lifoList.push(root);
+	
+	List *fifoList = new FifoList();
 
-	while (!lifoList.empty())
+	return generalSearch(problem, fifoList);
+}
+ActionSequence search::SearchAgent::extractActionSequnce(TreeNode * node)
+{
+	ActionSequence actionSec;
+	do
 	{
-		TreeNode *front = lifoList.top();
-		lifoList.pop();
-		if (isGoal(front))
-		{
-			return front;
-		}
-		else
-		{
-			std::vector<TreeNode *> children = front->getChildren();
-			for (auto i = children.begin(); i != children.end(); i++)
-			{
-				lifoList.push(*i);
-			}
-		}
-	}
-}
+		actionSec.addFirst(node->getAction());
+		node = node->getParent();
+	} while (node->getParent() != nullptr);
 
-core::search::TreeNode::TreeNode()
+	return actionSec;
+}
+void search::SearchAgent::expandNode(List *list, Problem &problem, TreeNode *node)
 {
-	setRemainingSeed(0);
+	State result;
+
+	if (problem.result(node->getState(), Actions::Left, result))
+	{
+		addNode(list, result, Actions::Left, node);
+	}
+
+	if (problem.result(node->getState(), Actions::UP, result))
+	{
+		addNode(list, result, Actions::UP, node);
+	}
+
+	if (problem.result(node->getState(), Actions::RIGHT, result))
+	{
+		addNode(list, result, Actions::RIGHT, node);
+	}
+
+	if (problem.result(node->getState(), Actions::DOWN, result))
+	{
+		addNode(list, result, Actions::DOWN, node);
+	}
+
+	
+}
+void search::SearchAgent::addNode(List * list, State & state, Actions action, TreeNode * parent)
+{
+	TreeNode *expanndedNode = new TreeNode();
+	expanndedNode->setAction(action);
+	expanndedNode->setParent(parent);
+	expanndedNode->setState(state);
+	list->push(expanndedNode);
+}
+//
+//TreeNode * search::Solver::DFS(TreeNode * root)
+//{
+//	std::stack<TreeNode *> lifoList;
+//	lifoList.push(root);
+//
+//	while (!lifoList.empty())
+//	{
+//		TreeNode *front = lifoList.top();
+//		lifoList.pop();
+//		if (isGoal(front))
+//		{
+//			return front;
+//		}
+//		else
+//		{
+//			std::vector<TreeNode *> children = front->getChildren();
+//			for (auto i = children.begin(); i != children.end(); i++)
+//			{
+//				lifoList.push(*i);
+//			}
+//		}
+//	}
+//}
+
+search::TreeNode::TreeNode()
+{
 	setParent(nullptr);
 }
 
-void core::search::TreeNode::setName(std::string name)
-{
-	this->name = name;
-}
-
-void core::search::TreeNode::setRemainingSeed(int seeds)
-{
-	this->remainingSeed = seeds;
-}
-
-void core::search::TreeNode::setParent(TreeNode * parent)
+void search::TreeNode::setParent(TreeNode * parent)
 {
 	this->parent = parent;
 }
 
-void core::search::TreeNode::addChild(TreeNode * child)
+Actions search::TreeNode::getAction() const
 {
-	this->children.push_back(child);
-	child->setParent(this);
+	return this->action;
 }
 
-std::string core::search::TreeNode::getName() const
+void search::TreeNode::setAction(Actions action)
 {
-	return this->name;
+	this->action = action;
 }
 
-int core::search::TreeNode::getRemainingSeed() const
+State search::TreeNode::getState()
 {
-	return this->remainingSeed;
+	return this->state;
 }
 
-TreeNode * core::search::TreeNode::getParent() const
+void search::TreeNode::setState(State state)
+{
+	this->state = state;
+}
+
+TreeNode * search::TreeNode::getParent() const
 {
 	return this->parent;
 }
 
-std::vector<TreeNode*> core::search::TreeNode::getChildren() const
+void search::ActionSequence::addFirst(Actions action)
 {
-	return this->children;
+	this->actionSequnce.push_front(action);
+}
+
+void search::ActionSequence::addLast(Actions action)
+{
+	this->actionSequnce.push_back(action);
+}
+
+std::string search::ActionSequence::toString() const
+{
+	std::string str = "";
+
+	for (auto i = this->actionSequnce.begin(); i != this->actionSequnce.end(); i++)
+	{
+		switch (*i)
+		{
+		case Actions::DOWN:
+			str += "Down -> ";
+			break;
+		case Actions::Left:
+			str += "Left -> ";
+			break;
+		case Actions::RIGHT:
+			str += "Right -> ";
+			break;
+		case Actions::UP:
+			str += "Up -> ";
+			break;
+		default:
+			break;
+		}
+	}
+	return str;
 }

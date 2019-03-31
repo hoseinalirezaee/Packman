@@ -1,30 +1,37 @@
 #include "search.h"
 #include <iostream>
+#include <fstream>
+#include "components.h"
 
+using namespace components;
+using namespace search;
+using namespace std;
 
-using namespace core::search;
 int main()
 {
+	
+	ifstream input("E:\\Daneshgah\\Programing\\C++\\C++ Test\\C++ Test\\in.txt");
+	
+	size_t len = 0;
+	char *data;
 
-	TreeNode *root = new TreeNode();
-	root->setRemainingSeed(2);
-	root->setName("Root");
+	input.seekg(0, ios::end);
+	len = input.tellg();
+	input.seekg(0, ios::beg);
 
-	TreeNode *L11 = new TreeNode();
-	L11->setRemainingSeed(1);
-	L11->setName("L11");
-	root->addChild(L11);
+	data = new char[len];
 
-	TreeNode *L12 = new TreeNode();
-	L12->setRemainingSeed(0);
-	L12->setName("L12");
-	root->addChild(L12);
+	input.read(data, len);
+
+	input.close();
 
 
-	TreeNode *L21 = new TreeNode();
-	L21->setName("L21");
-	L11->addChild(L21);
+	Problem problem(data, len);
 
-	std::cout << Solver::BFS(root)->getName();
+	ActionSequence actionSequenc = SearchAgent::BFS(problem);
 
+	cout << actionSequenc.toString() << endl;
+
+
+	
 }
