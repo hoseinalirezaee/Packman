@@ -5,8 +5,16 @@
 using namespace search;
 using namespace components;
 
-ActionSequence search::SearchAgent::generalSearch(Problem problem, List * list)
+template ActionSequence SearchAgent::generalGraphSearch<LifoList>(const Problem &);
+template ActionSequence SearchAgent::generalGraphSearch<FifoList>(const Problem &);
+template<class LT>
+ActionSequence SearchAgent::generalGraphSearch(const Problem &problem)
 {
+	List *list = new LT();
+
+	LookupTable exploredStates(problem.getInitialState().getEnvRowSize(),
+		problem.getInitialState().getEnvColSize());
+
 	TreeNode root;
 	root.setState(problem.getInitialState());
 	list->push(&root);
@@ -15,25 +23,35 @@ ActionSequence search::SearchAgent::generalSearch(Problem problem, List * list)
 	{
 		TreeNode *front = list->pop();
 
-		if (problem.isGoal(front->getState()))
+		if (!exploredStates.has(front->getState()))
 		{
-			return extractActionSequnce(front);
-		}
-		else
-		{
-			expandNode(list, problem, front);
+			exploredStates.insert(front->getState());
+			if (problem.isGoal(front->getState()))
+			{
+				auto temp = extractActionSequnce(front);
+				delete list;
+				return temp;
+			}
+			else
+			{
+				expandNode(list, problem, front, exploredStates);
+			}
 		}
 	}
+	delete list;
 	return ActionSequence();
 }
 
-ActionSequence SearchAgent::BFS(Problem problem)
+ActionSequence SearchAgent::BFS(const Problem &problem)
 {
-	
-	List *fifoList = new FifoList();
-
-	return generalSearch(problem, fifoList);
+	return generalGraphSearch<FifoList>(problem);
 }
+
+ActionSequence search::SearchAgent::DFS(const Problem &problem)
+{
+	return generalGraphSearch<LifoList>(problem);
+}
+
 ActionSequence search::SearchAgent::extractActionSequnce(TreeNode * node)
 {
 	ActionSequence actionSec;
@@ -45,31 +63,34 @@ ActionSequence search::SearchAgent::extractActionSequnce(TreeNode * node)
 
 	return actionSec;
 }
-void search::SearchAgent::expandNode(List *list, Problem &problem, TreeNode *node)
+void search::SearchAgent::expandNode(List *list, const Problem &problem, TreeNode *node,
+	const LookupTable &exploredStates)
 {
 	State result;
 
-	if (problem.result(node->getState(), Actions::Left, result))
+	if (problem.result(node->getState(), Actions::LEFT, result))
 	{
-		addNode(list, result, Actions::Left, node);
+		if (!exploredStates.has(result))
+			addNode(list, result, Actions::LEFT, node);
 	}
 
 	if (problem.result(node->getState(), Actions::UP, result))
 	{
-		addNode(list, result, Actions::UP, node);
+		if (!exploredStates.has(result))
+			addNode(list, result, Actions::UP, node);
 	}
 
 	if (problem.result(node->getState(), Actions::RIGHT, result))
 	{
-		addNode(list, result, Actions::RIGHT, node);
+		if (!exploredStates.has(result))
+			addNode(list, result, Actions::RIGHT, node);
 	}
 
 	if (problem.result(node->getState(), Actions::DOWN, result))
 	{
-		addNode(list, result, Actions::DOWN, node);
+		if (!exploredStates.has(result))
+			addNode(list, result, Actions::DOWN, node);
 	}
-
-	
 }
 void search::SearchAgent::addNode(List * list, State & state, Actions action, TreeNode * parent)
 {
@@ -79,30 +100,6 @@ void search::SearchAgent::addNode(List * list, State & state, Actions action, Tr
 	expanndedNode->setState(state);
 	list->push(expanndedNode);
 }
-//
-//TreeNode * search::Solver::DFS(TreeNode * root)
-//{
-//	std::stack<TreeNode *> lifoList;
-//	lifoList.push(root);
-//
-//	while (!lifoList.empty())
-//	{
-//		TreeNode *front = lifoList.top();
-//		lifoList.pop();
-//		if (isGoal(front))
-//		{
-//			return front;
-//		}
-//		else
-//		{
-//			std::vector<TreeNode *> children = front->getChildren();
-//			for (auto i = children.begin(); i != children.end(); i++)
-//			{
-//				lifoList.push(*i);
-//			}
-//		}
-//	}
-//}
 
 search::TreeNode::TreeNode()
 {
@@ -149,6 +146,21 @@ void search::ActionSequence::addLast(Actions action)
 	this->actionSequnce.push_back(action);
 }
 
+void search::ActionSequence::serialize(char *& data, size_t & size) const
+{
+	size = (this->actionSequnce.size() + 4);
+	data = new char[size];
+	*((int *)data) = this->actionSequnce.size();
+	
+	int i = 0;
+	char *temp = (data + 4);
+	for (auto item = actionSequnce.begin(); item != actionSequnce.end(); item++)
+	{
+		temp[i] = static_cast<char>(*item);
+		i++;
+	}
+}
+
 std::string search::ActionSequence::toString() const
 {
 	std::string str = "";
@@ -160,7 +172,7 @@ std::string search::ActionSequence::toString() const
 		case Actions::DOWN:
 			str += "Down -> ";
 			break;
-		case Actions::Left:
+		case Actions::LEFT:
 			str += "Left -> ";
 			break;
 		case Actions::RIGHT:

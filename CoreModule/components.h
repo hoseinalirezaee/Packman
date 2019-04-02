@@ -1,6 +1,7 @@
 #pragma once
 #include <string>
 #include <sstream>
+#include <vector>
 
 using namespace std;
 
@@ -9,7 +10,7 @@ namespace components
 
 	enum class EnvType { WALL = 1, EMPTY = 2, FOOD = 3, PACKMAN = 4 };
 	
-	enum class Actions { RIGHT = 1, Left = 2, UP = 3, DOWN = 4 };
+	enum class Actions { RIGHT = 1, LEFT = 2, UP = 3, DOWN = 4 };
 
 	class State
 	{
@@ -19,14 +20,14 @@ namespace components
 	public:
 		State();
 		State(int envRowCount, int envColCount);
-		State(State &state);
+		State(const State &state);
 		State(State &&state);
 		~State();
 
-		State &operator=(State &state);
+		State &operator=(const State &state);
 		State &operator=(State &&state);
 
-		bool operator==(State &state);
+		bool operator==(const State &state) const;
 
 		int getRow() const;
 		int getColumn() const;
@@ -38,7 +39,7 @@ namespace components
 		void setColumn(int col);
 		void setRemainingFood(int remainingFood);
 
-		EnvType &at(int i, int j);
+		EnvType &at(int i, int j) const;
 
 		string toString()
 		{
@@ -60,16 +61,34 @@ namespace components
 		State initialState;
 	public:
 		
-		Problem(char *inputData, size_t len);
+		Problem(const char *inputData, size_t len);
 
-		bool result(State state, Actions action, State &result);
-		bool isGoal(State state);
-		State getInitialState();
+		bool result(State state, Actions action, State &result) const;
+		bool isGoal(State state) const;
+		State getInitialState() const;
 
 	private:
-		State deserializeInput(char *inputData, size_t len);
+		State deserializeInput(const char *inputData, size_t len);
 
-		bool isValidState(State state);
+		bool isValidState(State state) const;
+	};
+
+
+	class LookupTable
+	{
+		
+		vector<State> **table;
+		size_t rowSize, colSize;
+	public:
+		LookupTable(size_t rowSize, size_t colSize);
+		~LookupTable();
+
+		void insert(const State &state);
+		//void remove(const State &state);
+
+		bool has(const State &state) const;
+
+		
 	};
 }
 

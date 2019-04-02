@@ -1,5 +1,4 @@
-#ifndef SEARCH_H
-#define SEARCH_H
+#pragma once
 
 #include <vector>
 #include <string>
@@ -16,7 +15,6 @@ using namespace components;
 
 namespace search
 {
-	
 	class TreeNode
 	{
 		TreeNode *parent;
@@ -44,6 +42,7 @@ namespace search
 	public:
 		void addFirst(Actions action);
 		void addLast(Actions action);
+		void serialize(char *&data, size_t &size) const;
 		std::string toString() const;
 	};
 
@@ -51,16 +50,15 @@ namespace search
 	{
 	
 	public:
-		static ActionSequence generalSearch(Problem problem, List *list);
-		static ActionSequence BFS(Problem problem);
-		//static ActionSequence DFS(Problem problem);
+		template <class LT>
+		static ActionSequence generalGraphSearch(const Problem &problem);
+		static ActionSequence BFS(const Problem &problem);
+		static ActionSequence DFS(const Problem &problem);
 
 	private:
 		static ActionSequence extractActionSequnce(TreeNode *node);
-		static void expandNode(List *list,Problem &problem, TreeNode *node);
+		static void expandNode(List *list, const Problem &problem, TreeNode *node, const LookupTable &exploredStates);
 		static void addNode(List * list, State & state, Actions action, TreeNode * parent);
 	};
 
 }
-
-#endif // !SEARCH_H

@@ -3,18 +3,18 @@
 
 using namespace components;
 
-Problem::Problem(char *inputData, size_t len)
+Problem::Problem(const char *inputData, size_t len)
 {
 	this->initialState = deserializeInput(inputData, len);
 }
 
-bool components::Problem::result(State state, Actions action, State &result)
+bool components::Problem::result(State state, Actions action, State &result) const
 {
 	state.at(state.getRow(), state.getColumn()) = EnvType::EMPTY;
 
 	switch (action)
 	{
-	case Actions::Left:
+	case Actions::LEFT:
 		state.setColumn(state.getColumn() - 1);
 		break;
 	case Actions::RIGHT:
@@ -44,17 +44,17 @@ bool components::Problem::result(State state, Actions action, State &result)
 	return false;
 }
 
-bool components::Problem::isGoal(State state)
+bool components::Problem::isGoal(State state) const
 {
 	return state.getRemainingFood() == 0;
 }
 
-State components::Problem::getInitialState()
+State components::Problem::getInitialState() const
 {
 	return initialState;
 }
 
-State components::Problem::deserializeInput(char * inputData, size_t len)
+State components::Problem::deserializeInput(const char * inputData, size_t len)
 {
 	if (inputData == nullptr)
 		throw "Cant be null:components::Problem::deserializeInput";
@@ -66,7 +66,7 @@ State components::Problem::deserializeInput(char * inputData, size_t len)
 
 	size_t foodCount = 0;
 
-	char *main = inputData + 8;
+	const char *main = inputData + 8;
 
 	for (int i = 0, k = 0; i < envRow; i++)
 	{
@@ -100,7 +100,7 @@ State components::Problem::deserializeInput(char * inputData, size_t len)
 	return state;
 }
 
-bool components::Problem::isValidState(State state)
+bool components::Problem::isValidState(State state) const
 {
 	if (state.getRow() < 0 || state.getRow() >= state.getEnvRowSize())
 		return false;
@@ -151,12 +151,12 @@ void components::State::setRemainingFood(int remainingFood)
 	this->remainingFood = remainingFood;
 }
 
-EnvType & components::State::at(int i, int j)
+EnvType & components::State::at(int i, int j) const
 {
 	return this->env[i][j];
 }
 
-components::State::State() : State(0, 0){}
+components::State::State() : State(0, 0) {};
 
 components::State::State(int envRowCount, int envColCount)
 {
@@ -183,7 +183,7 @@ components::State::State(int envRowCount, int envColCount)
 	
 }
 
-components::State::State(State & state) : State(state.getEnvRowSize(), state.getEnvColSize())
+components::State::State(const State & state) : State(state.getEnvRowSize(), state.getEnvColSize())
 {
 	*this = state;
 }
@@ -205,7 +205,7 @@ components::State::~State()
 	}
 }
 
-State & components::State::operator=(State & state)
+State & components::State::operator=(const State & state)
 {
 	this->~State();
 
@@ -235,11 +235,15 @@ State & components::State::operator=(State && state)
 	return *this;
 }
 
-bool components::State::operator==(State & state)
+bool components::State::operator==(const State & state) const
 {
 	if (this->envRowCount != state.envRowCount)
 		return false;
 	if (this->envColCount != state.envColCount)
+		return false;
+	if (this->row != state.row || this->column != state.column)
+		return false;
+	if (this->remainingFood != state.remainingFood)
 		return false;
 
 	for (int i = 0; i < envRowCount; i++)
@@ -253,4 +257,55 @@ bool components::State::operator==(State & state)
 		}
 	}
 	return true;
+}
+
+components::LookupTable::LookupTable(size_t rowSize, size_t colSize)
+{
+	if (rowSize <= 0 || colSize <= 0)
+	{
+		this->table = nullptr;
+		this->rowSize = 0;
+		this->colSize = 0;
+	}
+	else
+	{
+		this->rowSize = rowSize;
+		this->colSize = colSize;
+		table = new vector<State> *[rowSize];
+		for (int i = 0; i < rowSize; i++)
+		{
+			table[i] = new vector<State>[colSize];
+		}
+	}
+}
+
+components::LookupTable::~LookupTable()
+{
+	if (table != nullptr)
+	{
+		for (int i = 0; i < rowSize; i++)
+		{
+			delete[] table[i];
+		}
+		delete[] table;
+	}
+}
+
+void components::LookupTable::insert(const State &state)
+{
+	table[state.getRow()][state.getColumn()].push_back(state);
+}
+
+bool components::LookupTable::has(const State & state) const
+{
+	auto list = table[state.getRow()][state.getColumn()];
+	
+	for (auto item : list)
+	{
+		if (item == state)
+		{
+			return true;
+		}
+	}
+	return false;;
 }
