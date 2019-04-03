@@ -22,6 +22,6 @@ int main()
 	input.close();
 
 
-	solveProblem(inputData, inputSize, outputData, outputSize, 1);
+	nativeSolve(inputData, inputSize, outputData, outputSize, 1);
 	
 }

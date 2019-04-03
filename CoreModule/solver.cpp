@@ -5,10 +5,11 @@
 using namespace components;
 using namespace search;
 
-int solveProblem(const char *inputData, const size_t inputSize,
+int nativeSolve(const char *inputData, size_t inputSize,
 	char *&outputData, size_t &outputSize, int algorithm)
 {
 	Problem problem(inputData, inputSize);
+
 	ActionSequence actionSequenc;
 	switch (algorithm)
 	{
@@ -22,5 +23,6 @@ int solveProblem(const char *inputData, const size_t inputSize,
 		return -1;
 	}
 	actionSequenc.serialize(outputData, outputSize);
+
 	return 0;
 }
