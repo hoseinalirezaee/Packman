@@ -19,14 +19,20 @@ namespace Logic
         DOWN = 4
     }
 
+    public enum EnvType
+    {
+        WALL = 1,
+        EMPTY = 2,
+        FOOD = 3,
+        PACKMAN = 4
+    }
+
     public class Problem
     {
-        private enum EnvType
+        private class ParsedData
         {
-            WALL = 1,
-            EMPTY = 2,
-            FOOD = 3,
-            PACKMAN = 4
+            public State InitialState { get; set; }
+            public byte[] Data { get; set; }
         }
 
         public byte[] Data
@@ -35,9 +41,20 @@ namespace Logic
             private set;
         }
 
+        private State initialState;
+        public State InitialState
+        {
+            get
+            {
+                return initialState;
+            }
+        }
+
         public Problem(string inputString)
         {
-            Data = ParseInputString(inputString);
+            var parsedData = ParseInputString(inputString);
+            initialState = parsedData.InitialState;
+            Data = parsedData.Data;
         }
 
         public Problem(byte[] data)
@@ -51,8 +68,9 @@ namespace Logic
             return problem;
         }
 
-        private static byte[] ParseInputString(string inputString)
+        private static ParsedData ParseInputString(string inputString)
         {
+            
             string[] lines = SplitStringByLine(inputString);
 
             if (ValidateColumns(lines) == false)
@@ -63,6 +81,8 @@ namespace Logic
             int rowSize = lines.Length;
             int colSize = lines[0].Length;
 
+            State initialState = new State(rowSize, colSize);
+            
             MemoryStream memStream = new MemoryStream(rowSize * colSize + 8);
 
             BinaryWriter writer = new BinaryWriter(memStream);
@@ -78,16 +98,22 @@ namespace Logic
                     {
                         case '%':
                             writer.Write((byte)EnvType.WALL);
+                            initialState[i, j] = EnvType.WALL;
                             break;
                         case '.':
                             writer.Write((byte)EnvType.FOOD);
+                            initialState[i, j] = EnvType.FOOD;
                             break;
                         case 'p':
                         case 'P':
                             writer.Write((byte)EnvType.PACKMAN);
+                            initialState[i, j] = EnvType.PACKMAN;
+                            initialState.PackmanPosition.Row = i;
+                            initialState.PackmanPosition.Column = j;
                             break;
                         case ' ':
                             writer.Write((byte)EnvType.EMPTY);
+                            initialState[i, j] = EnvType.EMPTY;
                             break;
                         default:
                             throw new Exception("Input string contains an invalid symbol.");
@@ -100,8 +126,10 @@ namespace Logic
             BinaryReader reader = new BinaryReader(memStream);
 
             byte[] data = reader.ReadBytes(rowSize * colSize + 8);
-            
-            return data;
+
+            ParsedData parsedData = new ParsedData { Data = data, InitialState = initialState };
+
+            return parsedData;
         }
 
         private static string[] SplitStringByLine(string str)
@@ -135,6 +163,122 @@ namespace Logic
             return true;
         }
 
+        public State Result(State state, Actions action)
+        {
+            State result = new State(state);
+
+            int pacRow = state.PackmanPosition.Row;
+            int pacCol = state.PackmanPosition.Column;
+
+            result[pacRow, pacCol] = EnvType.EMPTY;
+
+            switch (action)
+            {
+                case Actions.LEFT:
+                    if (pacCol - 1 >= 0
+                        &&
+                        state[pacRow, pacCol - 1] != EnvType.WALL)
+                    {
+                        pacCol--;
+                    }
+                    else
+                    {
+                        return null;
+                    }
+                    break;
+                case Actions.UP:
+                    if (pacRow - 1 >= 0
+                        &&
+                        state[pacRow - 1, pacCol] != EnvType.WALL)
+                    {
+                        pacRow--;
+                    }
+                    else
+                    {
+                        return null;
+                    }
+                    break;
+                case Actions.RIGHT:
+                    if (pacCol + 1 < state.ColumnSize
+                        &&
+                        state[pacRow, pacCol + 1] != EnvType.WALL)
+                    {
+                        pacCol++;
+                    }
+                    else
+                    {
+                        return null;
+                    }
+                    break;
+                case Actions.DOWN:
+                    if (pacRow + 1 < state.RowSize
+                        &&
+                        state[pacRow + 1, pacCol] != EnvType.WALL)
+                    {
+                        pacRow++;
+                    }
+                    else
+                    {
+                        return null;
+                    }
+                    break;
+            }
+
+            result[pacRow, pacCol] = EnvType.PACKMAN;
+            result.PackmanPosition.Row = pacRow;
+            result.PackmanPosition.Column = pacCol;
+
+            return result;
+        }
+
+    }
+
+    public class PackmanPosition
+    {
+        public int Row { get; set; }
+        public int Column { get; set; }
+    }
+
+    public class State
+    {
+        private EnvType[,] state;
+
+        public PackmanPosition PackmanPosition { get; set; }
+
+        public int RowSize { get { return state.GetLength(0); } }
+
+        public int ColumnSize { get { return state.GetLength(1); } }
+
+        public State(State state) : this(state.RowSize, state.ColumnSize)
+        {
+            for (int i = 0; i < RowSize; i++)
+            {
+                for (int j = 0; j < ColumnSize; j++)
+                {
+                    this.state[i, j] = state[i, j];
+                }
+            }
+            this.PackmanPosition.Row = state.PackmanPosition.Row;
+            this.PackmanPosition.Column = state.PackmanPosition.Column;
+
+        }
+        public State(int rowSize, int colSize)
+        {
+            state = new EnvType[rowSize, colSize];
+            PackmanPosition = new PackmanPosition();
+        }
+
+        public EnvType this[int i, int j]
+        {
+            get
+            {
+                return state[i, j];
+            }
+            set
+            {
+                state[i, j] = value;
+            }
+        }
     }
 
     public class ActionSecuence
@@ -196,17 +340,14 @@ namespace Logic
 
             inputData = Marshal.AllocHGlobal(inputSize);
             Marshal.Copy(problem.Data, 0, inputData, inputSize);
-            while(true)
-            {
-                var status = nativeSolve(inputData, inputSize, out outputData, out outputSize, (int)algorithm);
-            }
-            
 
+            var status = nativeSolve(inputData, inputSize, out outputData, out outputSize, (int)algorithm);
+          
             byte[] rawActionSeq = new byte[outputSize];
 
             Marshal.Copy(outputData, rawActionSeq, 0, outputSize);
 
-            //Marshal.FreeHGlobal(inputData);
+            Marshal.FreeHGlobal(inputData);
             //Marshal.FreeHGlobal(outputData);
 
             return new ActionSecuence(rawActionSeq);

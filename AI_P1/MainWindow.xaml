@@ -5,8 +5,81 @@
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:local="clr-namespace:AI_P1"
         mc:Ignorable="d"
-        Title="MainWindow" Height="450" Width="800">
+        xmlns:GUI="clr-namespace:AI_P1.gui_elements"
+        Title="MainWindow" Height="450" Width="800"
+        x:Name="window"
+        Background="WhiteSmoke">
+    <Window.Resources>
+        <local:IntToTextConvertor x:Key="intToTextConv"/>
+        <local:CountToSize x:Key="cToSize"/>
+    </Window.Resources>
     <Grid>
-        <Button Content="Click" Click="Button_Click"/>
+        <DockPanel Margin="10">
+            <DockPanel DockPanel.Dock="Right" Margin="10">
+                <Grid DockPanel.Dock="Top">
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition/>
+                        <ColumnDefinition/>
+                    </Grid.ColumnDefinitions>
+
+                    <Button Content="Load from File" DockPanel.Dock="Top" Grid.Column="0" Margin="5"/>
+                    <Button Content="Save to File" DockPanel.Dock="Top" Grid.Column="1" Margin="5"/>
+                </Grid>
+
+                <Separator DockPanel.Dock="Top"/>
+
+                <Grid DockPanel.Dock="Top">
+                    <Grid.RowDefinitions>
+                        <RowDefinition/>
+                        <RowDefinition/>
+                    </Grid.RowDefinitions>
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition/>
+                        <ColumnDefinition/>
+                    </Grid.ColumnDefinitions>
+
+                    <TextBlock Text="Row size:" Grid.Row="0" Grid.Column="0" Margin="5"/>
+                    <TextBlock Text="Column size:" Grid.Row="1" Grid.Column="0" Margin="5"/>
+
+                    <TextBox x:Name="text_rowSize" Grid.Row="0" Grid.Column="1" Margin="5" TextAlignment="Center" 
+                             Text="{Binding ElementName=env, Path=RowCount, Converter={StaticResource intToTextConv}, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"/>
+                    <TextBox x:Name="text_colSize" Grid.Row="1" Grid.Column="1" Margin="5" TextAlignment="Center"
+                             Text="{Binding ElementName=env, Path=ColumnCount, Converter={StaticResource intToTextConv}, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"/>
+                </Grid>
+                <Separator DockPanel.Dock="Top"/>
+                <Grid DockPanel.Dock="Top">
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition/>
+                        <ColumnDefinition/>
+                    </Grid.ColumnDefinitions>
+                    <Grid.RowDefinitions>
+                        <RowDefinition/>
+                        <RowDefinition/>
+                        <RowDefinition/>
+                        <RowDefinition/>
+                        <RowDefinition/>
+                    </Grid.RowDefinitions>
+
+                    <TextBlock Text="Toolbox" Grid.ColumnSpan="2" VerticalAlignment="Center"/>
+
+
+                    <ToggleButton x:Name="wallTButton" Content="Wall" Grid.Row="1" Grid.ColumnSpan="2" Margin="5" Checked="ToggleButtonChecked" Unchecked="ToggleButtonUnchecked"/>
+                    <ToggleButton x:Name="emptyTButton" Content="Empty" Grid.Row="2" Grid.ColumnSpan="2" Margin="5" Checked="ToggleButtonChecked" Unchecked="ToggleButtonUnchecked"/>
+                    <ToggleButton x:Name="foodTButton" Content="Food" Grid.Row="3" Grid.ColumnSpan="2" Margin="5" Checked="ToggleButtonChecked" Unchecked="ToggleButtonUnchecked"/>
+                    <ToggleButton x:Name="packmanTButton" Content="Packman" Grid.Row="4" Grid.ColumnSpan="2" Margin="5" Checked="ToggleButtonChecked" Unchecked="ToggleButtonUnchecked"/>
+                </Grid>
+
+                <Separator DockPanel.Dock="Top"/>
+
+                <Button Content="Solve" DockPanel.Dock="Bottom" Margin="5" Click="SolveButtonClicked"/>
+
+                <Label/>
+            </DockPanel>
+
+            <Grid x:Name="gameGrid" DockPanel.Dock="Right" Margin="10">
+                <GUI:GameEnviroment x:Name="env"/>
+
+            </Grid>         
+        </DockPanel>
     </Grid>
 </Window>
