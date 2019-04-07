@@ -1,0 +1,22 @@
+﻿<Window x:Class="AI_P1.gui_elements.WaitBox"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        xmlns:local="clr-namespace:AI_P1.gui_elements"
+        mc:Ignorable="d"
+        Title="Pleas Wait" Height="200" Width="400"
+        Background="WhiteSmoke" WindowStartupLocation="CenterOwner" ResizeMode="NoResize" WindowStyle="ToolWindow">
+    <Grid>
+        <Grid.RowDefinitions>
+            <RowDefinition/>
+            <RowDefinition/>
+        </Grid.RowDefinitions>
+
+        <StackPanel VerticalAlignment="Center" Margin="15">
+            <TextBlock Text="Searching..."/>
+            <ProgressBar IsIndeterminate="True" Height="30"/>
+        </StackPanel>
+        <Button IsCancel="True" Content="Cancel" Grid.Row="1" Width="100" Height="30" Click="CancelClicked"/>
+    </Grid>
+</Window>

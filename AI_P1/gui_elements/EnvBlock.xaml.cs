@@ -2,15 +2,15 @@
 using System.Windows.Controls;
 using System.Windows.Media;
 using System.Windows.Shapes;
-
+using Logic;
 namespace AI_P1.gui_elements
 {
-    public enum EnvBlockType { Wall = 1, Empty = 2, Food = 3, Packman = 4 };
+    //public enum EnvType { Wall = 1, Empty = 2, Food = 3, Packman = 4 };
 
     public partial class EnvBlock : UserControl
     {
-        private EnvBlockType type;
-        public EnvBlockType Type
+        private EnvType type;
+        public EnvType Type
         {
             get
             {
@@ -26,7 +26,7 @@ namespace AI_P1.gui_elements
             }
         }
 
-        public delegate void TypeChangeEventHandler(object sender, EnvBlockType newType);
+        public delegate void TypeChangeEventHandler(object sender, EnvType newType);
         public event TypeChangeEventHandler TypeChanged;
 
         public EnvBlock()
@@ -35,22 +35,22 @@ namespace AI_P1.gui_elements
             TypeChanged += EnvBlock_TypeChanged;
         }
 
-        private void EnvBlock_TypeChanged(object sender, EnvBlockType newType)
+        private void EnvBlock_TypeChanged(object sender, EnvType newType)
         {
             var block = sender as EnvBlock;
             block.grid.Children.Clear();
             switch (newType)
             {
-                case EnvBlockType.Wall:
-                    block.grid.Background = new SolidColorBrush(Colors.Brown);
+                case EnvType.Wall:
+                    block.grid.Children.Add(new Rectangle { Fill = new SolidColorBrush(Colors.Brown) });// = new SolidColorBrush(Colors.Brown);
                     break;
-                case EnvBlockType.Empty:
-                    block.grid.Background = new SolidColorBrush(Colors.White);
+                case EnvType.Empty:
+                    block.grid.Children.Add(new Rectangle { Fill = new SolidColorBrush(Colors.White) });
                     break;
-                case EnvBlockType.Food:
+                case EnvType.Food:
                     block.grid.Children.Add(new Ellipse { Fill = new SolidColorBrush(Colors.Black) });
                     break;
-                case EnvBlockType.Packman:
+                case EnvType.Packman:
                     block.grid.Children.Add(new Ellipse { Fill = new SolidColorBrush(Colors.Yellow) });
                     break;
                 default:

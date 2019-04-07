@@ -2,23 +2,91 @@
 using System.ComponentModel;
 using System.Windows;
 using System.Windows.Controls;
-
+using Logic;
 namespace AI_P1.gui_elements
 {
-    
-    public partial class GameEnviroment : UserControl/*, INotifyPropertyChanged*/
+    public class Packman
     {
-        #region Extra
-        //public event PropertyChangedEventHandler PropertyChanged;
+        private EnvBlock[,] env;
+        public Packman(EnvBlock[,] env, int row, int col)
+        {
+            this.env = env;
+            Row = row;
+            Column = col;
+        }
+        public int Row { get; private set; }
+        public int Column { get; private set; }
+        public void Left()
+        {
+            if (Column - 1 >= 0
+                    &&
+                    env[Row, Column - 1].Type != EnvType.Wall)
+            {
+                env[Row, Column].Type = EnvType.Empty;
+                env[Row, --Column].Type = EnvType.Packman;
+            }
+            else
+            {
+                throw new Exception("Packman can not go left.");
+            }
+        }
+        public void Right()
+        {
+            if (Column + 1 < env.GetLength(1)
+                    &&
+                    env[Row, Column + 1].Type != EnvType.Wall)
+            {
+                env[Row, Column].Type = EnvType.Empty;
+                env[Row, ++Column].Type = EnvType.Packman;
+            }
+            else
+            {
+                throw new Exception("Packman can not go right.");
+            }
+        }
+        public void Up()
+        {
+            if (Row - 1 >= 0
+                    &&
+                    env[Row - 1, Column].Type != EnvType.Wall)
+            {
+                env[Row, Column].Type = EnvType.Empty;
+                env[--Row, Column].Type = EnvType.Packman;
+            }
+            else
+            {
+                throw new Exception("Packman can not go up.");
+            }
+        }
+        public void Down()
+        {
+            if (Row + 1 < env.GetLength(0)
+                    &&
+                    env[Row + 1, Column].Type != EnvType.Wall)
+            {
+                env[Row, Column].Type = EnvType.Empty;
+                env[++Row, Column].Type = EnvType.Packman;
+            }
+            else
+            {
+                throw new Exception("Packman can not go down.");
+            }
+        }
+    }
 
-        //private void OnPropertyChanged(string propName)
-        //{
-        //    PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(propName));
-        //}
+    public partial class GameEnviroment : UserControl
+    {
+        #region Private Fields
 
-        //private delegate void ColumnChangedEventHandler(object sender, int newValue);
-        //private event ColumnChangedEventHandler ColumnChanged;
+        private EnvBlock[,] env;
+
+        private int rowCount;
         private int columnCount;
+
+        #endregion
+
+        #region Properties
+
         public int ColumnCount
         {
             get
@@ -31,28 +99,10 @@ namespace AI_P1.gui_elements
                 {
                     columnCount = value;
                     GameEnviroment_ColumnChanged(this, value);
-                    //ColumnChanged?.Invoke(this, value);
                 }
             }
         }
-        //public static readonly DependencyProperty ColumnCountProperty 
-        //    = DependencyProperty.Register(
-        //        "ColumnCount",
-        //        typeof(int),
-        //        typeof(UserControl),
-        //        new PropertyMetadata(new PropertyChangedCallback(OnColumnCountChanged)));
 
-        //private static void OnColumnCountChanged(
-        //    DependencyObject d,
-        //    DependencyPropertyChangedEventArgs e)
-        //{
-        //    (d as GameEnviroment).ColumnCount = (int)e.NewValue;
-        //}
-
-
-        //private delegate void RowChangedEventHandler(object sender, int newValue);
-        //private event RowChangedEventHandler RowChanged;
-        private int rowCount;
         public int RowCount
         {
             get
@@ -65,74 +115,36 @@ namespace AI_P1.gui_elements
                 {
                     rowCount = value;
                     GameEnviroment_RowChanged(this, value);
-                    //RowChanged?.Invoke(this, value);
                 }
             }
         }
-        //public static readonly DependencyProperty RowCountProperty
-        //    = DependencyProperty.Register(
-        //        "RowCount",
-        //        typeof(int),
-        //        typeof(UserControl),
-        //        new PropertyMetadata(new PropertyChangedCallback(OnRowCountChanged)));
 
-        //private static void OnRowCountChanged(
-        //    DependencyObject d,
-        //    DependencyPropertyChangedEventArgs e)
-        //{
-        //    (d as GameEnviroment).RowCount = (int)e.NewValue;
-        //}
+        public EnvType? SelectedTool { get; set; } = null;
 
-        
+        public Packman Packman { get; private set; }
 
-        
-        #endregion Extra
+        #endregion
 
-        #region Relations
+        #region Public Functions
 
-        public void Show(Logic.State state)
+        public GameEnviroment()
         {
-            if (gridElements.GetLength(0) != state.RowSize
-                ||
-                gridElements.GetLength(1) != state.ColumnSize)
-            {
-                this.RowCount = state.RowSize;
-                this.ColumnCount = state.ColumnSize;
-            }
+            InitializeComponent();
+            RowCount = 1;
+            ColumnCount = 1;
+        }
 
-            for (int i = 0; i < state.RowSize; i++)
+        public EnvType this[int i, int j]
+        {
+            get
             {
-                for (int j = 0; j < state.ColumnSize; j++)
-                {
-                    gridElements[i, j].Type = (EnvBlockType)state[i, j];
-                }
+                return env[i, j].Type;
             }
         }
 
         #endregion
 
-        private EnvBlock[,] gridElements;
-
-        public EnvBlockType this[int i, int j]
-        {
-            get
-            {
-                return gridElements[i, j].Type;
-            }
-        }
-
-        public EnvBlockType? SelectedTool { get; set; } = null;
-
-        public GameEnviroment()
-        {
-            InitializeComponent();
-            //ColumnChanged += GameEnviroment_ColumnChanged;
-            //RowChanged += GameEnviroment_RowChanged;
-
-            RowCount = 1;
-            ColumnCount = 1;
-            
-        }
+        #region Private Functions
 
         private void GameEnviroment_RowChanged(object sender, int newValue)
         {
@@ -140,7 +152,7 @@ namespace AI_P1.gui_elements
             env.grid.RowDefinitions.Clear();
             for (int i = 0; i < newValue; i++)
             {
-                env.grid.RowDefinitions.Add(new RowDefinition { Height = new GridLength(1, GridUnitType.Star)});
+                env.grid.RowDefinitions.Add(new RowDefinition { Height = new GridLength(1, GridUnitType.Star) });
             }
             AddButon();
         }
@@ -151,24 +163,24 @@ namespace AI_P1.gui_elements
             env.grid.ColumnDefinitions.Clear();
             for (int i = 0; i < newValue; i++)
             {
-                env.grid.ColumnDefinitions.Add(new ColumnDefinition { Width = new GridLength(1, GridUnitType.Star)});
+                env.grid.ColumnDefinitions.Add(new ColumnDefinition { Width = new GridLength(1, GridUnitType.Star) });
             }
             AddButon();
-            
+
         }
 
         private void AddButon()
         {
-            gridElements = new EnvBlock[rowCount, columnCount];
+            env = new EnvBlock[rowCount, columnCount];
             for (int i = 0; i < rowCount; i++)
             {
                 for (int j = 0; j < columnCount; j++)
                 {
-                    gridElements[i, j] = new EnvBlock { Type = EnvBlockType.Empty};
-                    gridElements[i, j].MouseUp += GameEnviroment_MouseUp;
-                    grid.Children.Add(gridElements[i, j]);
-                    Grid.SetRow(gridElements[i, j], i);
-                    Grid.SetColumn(gridElements[i, j], j);
+                    env[i, j] = new EnvBlock { Type = EnvType.Empty };
+                    env[i, j].MouseUp += GameEnviroment_MouseUp;
+                    grid.Children.Add(env[i, j]);
+                    Grid.SetRow(env[i, j], i);
+                    Grid.SetColumn(env[i, j], j);
                 }
             }
         }
@@ -177,8 +189,82 @@ namespace AI_P1.gui_elements
         {
             if (SelectedTool != null)
             {
-                (sender as EnvBlock).Type = (EnvBlockType)SelectedTool;
+                var block = (sender as EnvBlock);
+                block.Type = (EnvType)SelectedTool;
+                
+                if (block.Type == EnvType.Packman)
+                {
+                    int newPackmanRow = Grid.GetRow(block);
+                    int newPackmanCol = Grid.GetColumn(block);
+
+                    if (Packman != null)
+                    {
+                        if (Packman.Row != newPackmanRow || Packman.Column != newPackmanCol)
+                        {
+                            env[Packman.Row, Packman.Column].Type = EnvType.Empty;
+                            Packman = new Packman(env, newPackmanRow, newPackmanCol);
+                        }
+                    }
+                    else
+                    {
+                        Packman = new Packman(env, newPackmanRow, newPackmanCol);
+                    }
+                }
             }
         }
+
+        #endregion
+
+        #region Relation functions to other objects
+
+        public void Show(State state)
+        {
+            if (env.GetLength(0) != state.RowSize
+                ||
+                env.GetLength(1) != state.ColumnSize)
+            {
+                this.RowCount = state.RowSize;
+                this.ColumnCount = state.ColumnSize;
+            }
+
+            int numberOfPackman = 0;
+            int packmanRow = -1;
+            int packmanCol = -1;
+
+
+            for (int i = 0; i < state.RowSize; i++)
+            {
+                for (int j = 0; j < state.ColumnSize; j++)
+                {
+                    env[i, j].Type = (EnvType)state[i, j];
+                    if (env[i, j].Type == EnvType.Packman)
+                    {
+                        numberOfPackman++;
+                        packmanRow = i;
+                        packmanCol = j;
+                    }
+                }
+            }
+
+            if (numberOfPackman != 1)
+                throw new Exception("Number of packman must be exactly one.");
+            else
+                Packman = new Packman(env, packmanRow, packmanCol);
+        }
+
+        public State GetState()
+        {
+            State state = new State(env.GetLength(0), env.GetLength(1));
+            for (int i = 0; i < env.GetLength(0); i++)
+            {
+                for (int j = 0; j < env.GetLength(1); j++)
+                {
+                    state[i, j] = env[i, j].Type;
+                }
+            }
+            return state;
+        }
+
+        #endregion
     }
 }

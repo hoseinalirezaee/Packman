@@ -21,115 +21,351 @@ namespace Logic
 
     public enum EnvType
     {
-        WALL = 1,
-        EMPTY = 2,
-        FOOD = 3,
-        PACKMAN = 4
+        Wall = 1,
+        Empty = 2,
+        Food = 3,
+        Packman = 4
     }
 
-    public class Problem
+    ////public class Problem
+    ////{
+    ////    private class ParsedData
+    ////    {
+    ////        public State InitialState { get; set; }
+    ////        public byte[] Data { get; set; }
+    ////    }
+
+    ////    public byte[] Data
+    ////    {
+    ////        get;
+    ////        private set;
+    ////    }
+
+    ////    private State initialState;
+    ////    public State InitialState
+    ////    {
+    ////        get
+    ////        {
+    ////            return initialState;
+    ////        }
+    ////    }
+
+    ////    public Problem(string inputString)
+    ////    {
+    ////        var parsedData = ParseInputString(inputString);
+    ////        initialState = parsedData.InitialState;
+    ////        Data = parsedData.Data;
+    ////    }
+
+    ////    public Problem(byte[] data)
+    ////    {
+    ////        Data = data;
+    ////    }
+
+    ////    public static Problem CreateProblem(string inputString)
+    ////    {
+    ////        Problem problem = new Problem(inputString);
+    ////        return problem;
+    ////    }
+
+    ////    private static ParsedData ParseInputString(string inputString)
+    ////    {
+            
+    ////        string[] lines = SplitStringByLine(inputString);
+
+    ////        if (ValidateColumns(lines) == false)
+    ////        {
+    ////            throw new Exception("Columns sizes must be same.");
+    ////        }
+
+    ////        int rowSize = lines.Length;
+    ////        int colSize = lines[0].Length;
+
+    ////        State initialState = new State(rowSize, colSize);
+            
+    ////        MemoryStream memStream = new MemoryStream(rowSize * colSize + 8);
+
+    ////        BinaryWriter writer = new BinaryWriter(memStream);
+
+    ////        writer.Write(rowSize);
+    ////        writer.Write(colSize);
+
+    ////        for (int i = 0, k = 0; i < rowSize; i++)
+    ////        {
+    ////            for (int j = 0; j < colSize; j++, k++)
+    ////            {
+    ////                switch(lines[i][j])
+    ////                {
+    ////                    case '%':
+    ////                        writer.Write((byte)EnvType.WALL);
+    ////                        initialState[i, j] = EnvType.WALL;
+    ////                        break;
+    ////                    case '.':
+    ////                        writer.Write((byte)EnvType.FOOD);
+    ////                        initialState[i, j] = EnvType.FOOD;
+    ////                        break;
+    ////                    case 'p':
+    ////                    case 'P':
+    ////                        writer.Write((byte)EnvType.PACKMAN);
+    ////                        initialState[i, j] = EnvType.PACKMAN;
+    ////                        initialState.Packman.Row = i;
+    ////                        initialState.Packman.Column = j;
+    ////                        break;
+    ////                    case ' ':
+    ////                        writer.Write((byte)EnvType.EMPTY);
+    ////                        initialState[i, j] = EnvType.EMPTY;
+    ////                        break;
+    ////                    default:
+    ////                        throw new Exception("Input string contains an invalid symbol.");
+    ////                }
+    ////            }
+    ////        }
+
+    ////        memStream.Seek(0, SeekOrigin.Begin);
+
+    ////        BinaryReader reader = new BinaryReader(memStream);
+
+    ////        byte[] data = reader.ReadBytes(rowSize * colSize + 8);
+
+    ////        ParsedData parsedData = new ParsedData { Data = data, InitialState = initialState };
+
+    ////        return parsedData;
+    ////    }
+
+    ////    private static string[] SplitStringByLine(string str)
+    ////    {
+    ////        if (str != null)
+    ////        {
+    ////            List<string> strList = new List<string>();
+    ////            StringReader strReader = new StringReader(str);
+    ////            string temp;
+    ////            while ((temp = strReader.ReadLine()) != null)
+    ////            {
+    ////                strList.Add(temp);
+    ////            }
+    ////            return strList.ToArray();
+    ////        }
+    ////        return null;
+    ////    }
+
+    ////    private static bool ValidateColumns(string[] lines)
+    ////    {
+    ////        for (int i = 0; i < lines.Length; i++)
+    ////        {
+    ////            for (int j = i + 1; j < lines.Length; j++)
+    ////            {
+    ////                if (lines[i].Length != lines[j].Length)
+    ////                {
+    ////                    return false;
+    ////                }
+    ////            }
+    ////        }
+    ////        return true;
+    ////    }
+
+    ////    public State Result(State state, Actions action)
+    ////    {
+    ////        State result = new State(state);
+
+    ////        int pacRow = state.Packman.Row;
+    ////        int pacCol = state.Packman.Column;
+
+    ////        result[pacRow, pacCol] = EnvType.EMPTY;
+
+    ////        switch (action)
+    ////        {
+    ////            case Actions.LEFT:
+    ////                if (pacCol - 1 >= 0
+    ////                    &&
+    ////                    state[pacRow, pacCol - 1] != EnvType.WALL)
+    ////                {
+    ////                    pacCol--;
+    ////                }
+    ////                else
+    ////                {
+    ////                    return null;
+    ////                }
+    ////                break;
+    ////            case Actions.UP:
+    ////                if (pacRow - 1 >= 0
+    ////                    &&
+    ////                    state[pacRow - 1, pacCol] != EnvType.WALL)
+    ////                {
+    ////                    pacRow--;
+    ////                }
+    ////                else
+    ////                {
+    ////                    return null;
+    ////                }
+    ////                break;
+    ////            case Actions.RIGHT:
+    ////                if (pacCol + 1 < state.ColumnSize
+    ////                    &&
+    ////                    state[pacRow, pacCol + 1] != EnvType.WALL)
+    ////                {
+    ////                    pacCol++;
+    ////                }
+    ////                else
+    ////                {
+    ////                    return null;
+    ////                }
+    ////                break;
+    ////            case Actions.DOWN:
+    ////                if (pacRow + 1 < state.RowSize
+    ////                    &&
+    ////                    state[pacRow + 1, pacCol] != EnvType.WALL)
+    ////                {
+    ////                    pacRow++;
+    ////                }
+    ////                else
+    ////                {
+    ////                    return null;
+    ////                }
+    ////                break;
+    ////        }
+
+    ////        result[pacRow, pacCol] = EnvType.PACKMAN;
+    ////        result.Packman.Row = pacRow;
+    ////        result.Packman.Column = pacCol;
+
+    ////        return result;
+    ////    }
+
+    ////    public new string ToString()
+    ////    {
+    ////        StringWriter p = new StringWriter();
+
+    ////        for (int i = 0; i < initialState.RowSize; i++)
+    ////        {
+    ////            for (int j = 0; j < initialState.ColumnSize; j++)
+    ////            {
+    ////                switch(initialState[i, j])
+    ////                {
+    ////                    case EnvType.WALL:
+    ////                        p.Write('%');
+    ////                        break;
+    ////                    case EnvType.PACKMAN:
+    ////                        p.Write('P');
+    ////                        break;
+    ////                    case EnvType.FOOD:
+    ////                        p.Write('.');
+    ////                        break;
+    ////                    case EnvType.EMPTY:
+    ////                        p.Write(' ');
+    ////                        break;
+    ////                }
+    ////                p.Write(p.NewLine);
+    ////            }
+    ////        }
+    ////        return p.ToString();
+    ////    }
+    ////}
+
+    public class Packman
+    {
+        public Packman(int row, int col)
+        {
+            Row = row;
+            Column = col;
+        }
+        public int Row { get; private set; }
+        public int Column { get; private set; }
+    }
+
+    public class State
     {
         private class ParsedData
         {
-            public State InitialState { get; set; }
+            public EnvType[,] Environment { get; set; }
             public byte[] Data { get; set; }
+
+            public Packman Packman { get; set; }
         }
 
+        private EnvType[,] env;
+
+        private byte[] data;
         public byte[] Data
-        {
-            get;
-            private set;
-        }
-
-        private State initialState;
-        public State InitialState
         {
             get
             {
-                return initialState;
+                if (data == null)
+                {
+                    data = new byte[8 + RowSize * ColumnSize];
+                    using (BinaryWriter writer = new BinaryWriter(new MemoryStream(data)))
+                    {
+                        writer.Write((int)RowSize);
+                        writer.Write((int)ColumnSize);
+
+                        for (int i = 0; i < RowSize; i++)
+                        {
+                            for (int j = 0; j < ColumnSize; j++)
+                            {
+                                writer.Write((byte)env[i, j]);
+                            }
+                        }
+                    }
+                }
+                return data;
+            }
+            private set
+            {
+                data = value;
             }
         }
+        public Packman Packman { get; private set; }
 
-        public Problem(string inputString)
+        public int RowSize { get { return env.GetLength(0); } }
+
+        public int ColumnSize { get { return env.GetLength(1); } }
+
+        public State(State state) : this(state.RowSize, state.ColumnSize)
         {
-            var parsedData = ParseInputString(inputString);
-            initialState = parsedData.InitialState;
+            for (int i = 0; i < RowSize; i++)
+            {
+                for (int j = 0; j < ColumnSize; j++)
+                {
+                    this.env[i, j] = state[i, j];
+                }
+            }
+            Packman = new Packman(state.Packman.Row, state.Packman.Column);
+            Data = state.Data;
+        }
+
+        public State(string str)
+        {
+            var parsedData = ParseInputString(str);
+            env = parsedData.Environment;
+            Packman = parsedData.Packman;
             Data = parsedData.Data;
         }
 
-        public Problem(byte[] data)
+        //public State(byte[] data)
+        //{
+
+        //}
+
+        public State(int rowSize, int colSize)
         {
-            Data = data;
+            env = new EnvType[rowSize, colSize];
         }
 
-        public static Problem CreateProblem(string inputString)
+        public EnvType this[int i, int j]
         {
-            Problem problem = new Problem(inputString);
-            return problem;
-        }
-
-        private static ParsedData ParseInputString(string inputString)
-        {
-            
-            string[] lines = SplitStringByLine(inputString);
-
-            if (ValidateColumns(lines) == false)
+            get
             {
-                throw new Exception("Columns sizes must be same.");
+                return env[i, j];
             }
-
-            int rowSize = lines.Length;
-            int colSize = lines[0].Length;
-
-            State initialState = new State(rowSize, colSize);
-            
-            MemoryStream memStream = new MemoryStream(rowSize * colSize + 8);
-
-            BinaryWriter writer = new BinaryWriter(memStream);
-
-            writer.Write(rowSize);
-            writer.Write(colSize);
-
-            for (int i = 0, k = 0; i < rowSize; i++)
+            set
             {
-                for (int j = 0; j < colSize; j++, k++)
+                if (value == EnvType.Packman)
                 {
-                    switch(lines[i][j])
-                    {
-                        case '%':
-                            writer.Write((byte)EnvType.WALL);
-                            initialState[i, j] = EnvType.WALL;
-                            break;
-                        case '.':
-                            writer.Write((byte)EnvType.FOOD);
-                            initialState[i, j] = EnvType.FOOD;
-                            break;
-                        case 'p':
-                        case 'P':
-                            writer.Write((byte)EnvType.PACKMAN);
-                            initialState[i, j] = EnvType.PACKMAN;
-                            initialState.PackmanPosition.Row = i;
-                            initialState.PackmanPosition.Column = j;
-                            break;
-                        case ' ':
-                            writer.Write((byte)EnvType.EMPTY);
-                            initialState[i, j] = EnvType.EMPTY;
-                            break;
-                        default:
-                            throw new Exception("Input string contains an invalid symbol.");
-                    }
+                    if (Packman != null)
+                        env[Packman.Row, Packman.Column] = EnvType.Empty;
+                    Packman = new Packman(i, j);
                 }
+                env[i, j] = value;
             }
-
-            memStream.Seek(0, SeekOrigin.Begin);
-
-            BinaryReader reader = new BinaryReader(memStream);
-
-            byte[] data = reader.ReadBytes(rowSize * colSize + 8);
-
-            ParsedData parsedData = new ParsedData { Data = data, InitialState = initialState };
-
-            return parsedData;
         }
 
         private static string[] SplitStringByLine(string str)
@@ -162,122 +398,98 @@ namespace Logic
             }
             return true;
         }
-
-        public State Result(State state, Actions action)
+        private static ParsedData ParseInputString(string inputString)
         {
-            State result = new State(state);
+            string[] lines = SplitStringByLine(inputString);
 
-            int pacRow = state.PackmanPosition.Row;
-            int pacCol = state.PackmanPosition.Column;
-
-            result[pacRow, pacCol] = EnvType.EMPTY;
-
-            switch (action)
+            if (ValidateColumns(lines) == false)
             {
-                case Actions.LEFT:
-                    if (pacCol - 1 >= 0
-                        &&
-                        state[pacRow, pacCol - 1] != EnvType.WALL)
-                    {
-                        pacCol--;
-                    }
-                    else
-                    {
-                        return null;
-                    }
-                    break;
-                case Actions.UP:
-                    if (pacRow - 1 >= 0
-                        &&
-                        state[pacRow - 1, pacCol] != EnvType.WALL)
-                    {
-                        pacRow--;
-                    }
-                    else
-                    {
-                        return null;
-                    }
-                    break;
-                case Actions.RIGHT:
-                    if (pacCol + 1 < state.ColumnSize
-                        &&
-                        state[pacRow, pacCol + 1] != EnvType.WALL)
-                    {
-                        pacCol++;
-                    }
-                    else
-                    {
-                        return null;
-                    }
-                    break;
-                case Actions.DOWN:
-                    if (pacRow + 1 < state.RowSize
-                        &&
-                        state[pacRow + 1, pacCol] != EnvType.WALL)
-                    {
-                        pacRow++;
-                    }
-                    else
-                    {
-                        return null;
-                    }
-                    break;
+                throw new Exception("Columns sizes must be same.");
             }
 
-            result[pacRow, pacCol] = EnvType.PACKMAN;
-            result.PackmanPosition.Row = pacRow;
-            result.PackmanPosition.Column = pacCol;
+            int rowSize = lines.Length;
+            int colSize = lines[0].Length;
 
-            return result;
-        }
+            EnvType[,] env = new EnvType[rowSize, colSize];
 
-    }
+            MemoryStream memStream = new MemoryStream(rowSize * colSize + 8);
 
-    public class PackmanPosition
-    {
-        public int Row { get; set; }
-        public int Column { get; set; }
-    }
+            BinaryWriter writer = new BinaryWriter(memStream);
 
-    public class State
-    {
-        private EnvType[,] state;
+            Packman packman = null;
 
-        public PackmanPosition PackmanPosition { get; set; }
+            writer.Write(rowSize);
+            writer.Write(colSize);
 
-        public int RowSize { get { return state.GetLength(0); } }
-
-        public int ColumnSize { get { return state.GetLength(1); } }
-
-        public State(State state) : this(state.RowSize, state.ColumnSize)
-        {
-            for (int i = 0; i < RowSize; i++)
+            for (int i = 0, k = 0; i < rowSize; i++)
             {
-                for (int j = 0; j < ColumnSize; j++)
+                for (int j = 0; j < colSize; j++, k++)
                 {
-                    this.state[i, j] = state[i, j];
+                    switch (lines[i][j])
+                    {
+                        case '%':
+                            writer.Write((byte)EnvType.Wall);
+                            env[i, j] = EnvType.Wall;
+                            break;
+                        case '.':
+                            writer.Write((byte)EnvType.Food);
+                            env[i, j] = EnvType.Food;
+                            break;
+                        case 'p':
+                        case 'P':
+                            writer.Write((byte)EnvType.Packman);
+                            env[i, j] = EnvType.Packman;
+                            packman = new Packman(i, j);
+                            break;
+                        case ' ':
+                            writer.Write((byte)EnvType.Empty);
+                            env[i, j] = EnvType.Empty;
+                            break;
+                        default:
+                            throw new Exception("Input string contains an invalid symbol.");
+                    }
                 }
             }
-            this.PackmanPosition.Row = state.PackmanPosition.Row;
-            this.PackmanPosition.Column = state.PackmanPosition.Column;
 
-        }
-        public State(int rowSize, int colSize)
-        {
-            state = new EnvType[rowSize, colSize];
-            PackmanPosition = new PackmanPosition();
+            memStream.Seek(0, SeekOrigin.Begin);
+
+            BinaryReader reader = new BinaryReader(memStream);
+
+            byte[] data = reader.ReadBytes(rowSize * colSize + 8);
+
+            ParsedData parsedData = new ParsedData { Data = data, Environment = env, Packman = packman };
+
+            return parsedData;
         }
 
-        public EnvType this[int i, int j]
+        public new string ToString()
         {
-            get
+            StringWriter strWriter = new StringWriter();
+
+            for (int i = 0; i < env.GetLength(0); i++)
             {
-                return state[i, j];
+                for (int j = 0; j < env.GetLength(1); j++)
+                {
+                    switch (env[i, j])
+                    {
+                        case EnvType.Wall:
+                            strWriter.Write('%');
+                            break;
+                        case EnvType.Empty:
+                            strWriter.Write(' ');
+                            break;
+                        case EnvType.Food:
+                            strWriter.Write('.');
+                            break;
+                        case EnvType.Packman:
+                            strWriter.Write('p');
+                            break;
+                    }
+                }
+                strWriter.Write(strWriter.NewLine);
             }
-            set
-            {
-                state[i, j] = value;
-            }
+
+            return strWriter.ToString();
         }
     }
 
@@ -331,15 +543,15 @@ namespace Logic
         [DllImport(@"CoreModule.dll", CallingConvention = CallingConvention.Cdecl)]
         private static extern int nativeSolve(IntPtr inputData, int inputSize, out IntPtr outputData, out int outputSize, int algorithm);
 
-        public static ActionSecuence Solve(Problem problem, Algorithms algorithm)
+        public static ActionSecuence Solve(State initialState, Algorithms algorithm)
         {
             IntPtr inputData, outputData;
             int inputSize, outputSize;
 
-            inputSize = problem.Data.Length;
+            inputSize = initialState.Data.Length;
 
             inputData = Marshal.AllocHGlobal(inputSize);
-            Marshal.Copy(problem.Data, 0, inputData, inputSize);
+            Marshal.Copy(initialState.Data, 0, inputData, inputSize);
 
             var status = nativeSolve(inputData, inputSize, out outputData, out outputSize, (int)algorithm);
           
@@ -348,7 +560,6 @@ namespace Logic
             Marshal.Copy(outputData, rawActionSeq, 0, outputSize);
 
             Marshal.FreeHGlobal(inputData);
-            //Marshal.FreeHGlobal(outputData);
 
             return new ActionSecuence(rawActionSeq);
         }

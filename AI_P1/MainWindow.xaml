@@ -6,7 +6,7 @@
         xmlns:local="clr-namespace:AI_P1"
         mc:Ignorable="d"
         xmlns:GUI="clr-namespace:AI_P1.gui_elements"
-        Title="MainWindow" Height="450" Width="800"
+        Title="MainWindow" Height="500" Width="800"
         x:Name="window"
         Background="WhiteSmoke">
     <Window.Resources>
@@ -17,13 +17,13 @@
         <DockPanel Margin="10">
             <DockPanel DockPanel.Dock="Right" Margin="10">
                 <Grid DockPanel.Dock="Top">
-                    <Grid.ColumnDefinitions>
-                        <ColumnDefinition/>
-                        <ColumnDefinition/>
-                    </Grid.ColumnDefinitions>
+                    <Grid.RowDefinitions>
+                        <RowDefinition/>
+                        <RowDefinition/>
+                    </Grid.RowDefinitions>
 
-                    <Button Content="Load from File" DockPanel.Dock="Top" Grid.Column="0" Margin="5"/>
-                    <Button Content="Save to File" DockPanel.Dock="Top" Grid.Column="1" Margin="5"/>
+                    <Button Content="Load Problem" DockPanel.Dock="Top" Grid.Row="0" Margin="5" Click="LoadButtonClicked"/>
+                    <Button Content="Save Problem" DockPanel.Dock="Top" Grid.Row="1" Margin="5" Click="SaveButtonClicked"/>
                 </Grid>
 
                 <Separator DockPanel.Dock="Top"/>
@@ -64,21 +64,33 @@
 
 
                     <ToggleButton x:Name="wallTButton" Content="Wall" Grid.Row="1" Grid.ColumnSpan="2" Margin="5" Checked="ToggleButtonChecked" Unchecked="ToggleButtonUnchecked"/>
-                    <ToggleButton x:Name="emptyTButton" Content="Empty" Grid.Row="2" Grid.ColumnSpan="2" Margin="5" Checked="ToggleButtonChecked" Unchecked="ToggleButtonUnchecked"/>
+                    <ToggleButton x:Name="emptyTButton" Content="Eraser" Grid.Row="2" Grid.ColumnSpan="2" Margin="5" Checked="ToggleButtonChecked" Unchecked="ToggleButtonUnchecked"/>
                     <ToggleButton x:Name="foodTButton" Content="Food" Grid.Row="3" Grid.ColumnSpan="2" Margin="5" Checked="ToggleButtonChecked" Unchecked="ToggleButtonUnchecked"/>
                     <ToggleButton x:Name="packmanTButton" Content="Packman" Grid.Row="4" Grid.ColumnSpan="2" Margin="5" Checked="ToggleButtonChecked" Unchecked="ToggleButtonUnchecked"/>
                 </Grid>
 
                 <Separator DockPanel.Dock="Top"/>
 
+                <Button Content="Reset to Initial State" DockPanel.Dock="Bottom" Margin="5" Click="ResetToInitState"/>
+                <Button Content="Show Path" DockPanel.Dock="Bottom" Margin="5" Click="ShowButtonClicked"/>
                 <Button Content="Solve" DockPanel.Dock="Bottom" Margin="5" Click="SolveButtonClicked"/>
-
+                
+                <Grid DockPanel.Dock="Bottom">
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition/>
+                        <ColumnDefinition/>
+                    </Grid.ColumnDefinitions>
+                    <TextBlock Text="Algorithm:" Grid.Column="0" Margin="5"/>
+                    <ComboBox x:Name="algorithm" Grid.Column="1" Margin="5">
+                        <ComboBoxItem Content="BFS" IsSelected="True" Tag="1"/>
+                        <ComboBoxItem Content="DFS" Tag="2"/>
+                    </ComboBox>
+                </Grid>
                 <Label/>
             </DockPanel>
 
             <Grid x:Name="gameGrid" DockPanel.Dock="Right" Margin="10">
                 <GUI:GameEnviroment x:Name="env"/>
-
             </Grid>         
         </DockPanel>
     </Grid>

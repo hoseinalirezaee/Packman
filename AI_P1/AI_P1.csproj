@@ -63,6 +63,10 @@
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
     </Page>
+    <Page Include="gui_elements\WaitBox.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
     <Page Include="MainWindow.xaml">
       <Generator>MSBuild:Compile</Generator>
       <SubType>Designer</SubType>
@@ -77,6 +81,10 @@
     <Compile Include="gui_elements\GameEnviroment.xaml.cs">
       <DependentUpon>GameEnviroment.xaml</DependentUpon>
     </Compile>
+    <Compile Include="gui_elements\WaitBox.xaml.cs">
+      <DependentUpon>WaitBox.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="logic\io.cs" />
     <Compile Include="logic\logic.cs" />
     <Compile Include="MainWindow.xaml.cs">
       <DependentUpon>MainWindow.xaml</DependentUpon>

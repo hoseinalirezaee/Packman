@@ -21,6 +21,8 @@ using Logic;
 using AI_P1.gui_elements;
 using System.Globalization;
 using System.Windows.Controls.Primitives;
+using Microsoft.Win32;
+using AI_P1.io;
 
 namespace AI_P1
 {
@@ -32,14 +34,17 @@ namespace AI_P1
         private ToggleButton[] tools = new ToggleButton[4];
         private ToggleButton selectedTool = null;
 
+        private State initialState = null;
+        private ActionSecuence actionSeq = null;
+
         public MainWindow()
         {
             InitializeComponent();
 
-            wallTButton.Tag = EnvBlockType.Wall;
-            emptyTButton.Tag = EnvBlockType.Empty;
-            foodTButton.Tag = EnvBlockType.Food;
-            packmanTButton.Tag = EnvBlockType.Packman;
+            wallTButton.Tag = EnvType.Wall;
+            emptyTButton.Tag = EnvType.Empty;
+            foodTButton.Tag = EnvType.Food;
+            packmanTButton.Tag = EnvType.Packman;
 
             tools[0] = wallTButton;
             tools[1] = emptyTButton;
@@ -48,172 +53,101 @@ namespace AI_P1
 
             env.RowCount = 4;
             env.ColumnCount = 6;
-            
-
-
-        }
-
-
-        private void Worker_ProgressChanged(object sender, ProgressChangedEventArgs e)
-        {
-            env.Show(e.UserState as State);
-        }
-
-        private void Worker_DoWork(object sender, DoWorkEventArgs e)
-        {
-            var worker = sender as BackgroundWorker;
-
-            FileStream inputStream = new FileStream(@"E:\Daneshgah\Term 6\Artificial Intelligence and Expert Systems\Project\3.txt", FileMode.Open, FileAccess.Read);
-
-            StreamReader reader = new StreamReader(inputStream);
-
-            string data = reader.ReadToEnd();
-
-            inputStream.Close();
-
-            Problem problem = new Problem(data);
-
-            var actionSeq = ProblemSolver.Solve(problem, Algorithms.BFS);
-
-            State currentState = problem.InitialState;
-
-            worker.ReportProgress(0, currentState);
-            Thread.Sleep(2000);
-
-            for (int i = 0; i < actionSeq.Size; i++)
-            {
-                currentState = problem.Result(currentState, actionSeq[i]);
-                worker.ReportProgress(i, currentState);
-                Thread.Sleep(500);
-            }
-        }
-
-        private void Button_Click(object sender, RoutedEventArgs e)
-        {
-
-            //{   1, 1, 1, 1, 1, 1,
-            //    1, 3, 1, 3, 1, 1,
-            //    1, 1, 1, 1, 1, 1,
-            //    1, 3, 1, 3, 1, 1,
-            //    1, 4, 1, 1, 1, 1,
-            //    1, 1, 1, 1, 1, 1,   }
-           
-            FileStream inputStream = new FileStream(@"E:\Daneshgah\Term 6\Artificial Intelligence and Expert Systems\Project\3.txt", FileMode.Open, FileAccess.Read);
-
-            StreamReader reader = new StreamReader(inputStream);
-
-            string data = reader.ReadToEnd();
-
-            inputStream.Close();
-
-            Problem problem = new Problem(data);
-
-            var actionSeq = ProblemSolver.Solve(problem, Algorithms.BFS);
-
-            String str = String.Empty;
-
-            for (int i = 0; i < actionSeq.Size; i++)
-            {
-                str += ((int)actionSeq[i]).ToString();
-            }
-
         }
 
         private void SolveButtonClicked(object sender, RoutedEventArgs e)
         {
-            StringWriter strWriter = new StringWriter();
-            int packCount = 0;
+            initialState = env.GetState();
 
-            for (int i = 0; i < env.RowCount; i++)
+            if (initialState.Packman != null)
             {
-                for (int j = 0; j < env.ColumnCount; j++)
-                {
-                    switch(env[i, j])
-                    {
-                        case EnvBlockType.Wall:
-                            strWriter.Write('%');
-                            break;
-                        case EnvBlockType.Empty:
-                            strWriter.Write(' ');
-                            break;
-                        case EnvBlockType.Food:
-                            strWriter.Write('.');
-                            break;
-                        case EnvBlockType.Packman:
-                            strWriter.Write('p');
-                            packCount++;
-                            break;
-                    }
-                }
-                strWriter.Write(strWriter.NewLine);
-            }
+                Algorithms algo = (Algorithms)int.Parse((algorithm.SelectedItem as ComboBoxItem).Tag.ToString());
 
-            if (packCount > 1)
-            {
-                MessageBox.Show("Number of packman can't be more than one.");
+                actionSeq = ProblemSolver.Solve(initialState, algo);
+
+                MessageBox.Show("Solved.");
             }
             else
             {
-                strWriter.Flush();
-                Problem problem = new Problem(strWriter.ToString());
-                ActionSecuence actionSeq = ProblemSolver.Solve(problem, Algorithms.BFS);
-                env.Show(problem.InitialState);
-
-                if (actionSeq.Size != 0)
-                {
-                    MessageBox.Show("Route found.");
-
-                    BackgroundWorker worker = new BackgroundWorker();
-                    worker.WorkerReportsProgress = true;
-                    worker.ProgressChanged += StateChanged;
-                    worker.DoWork += ShowRoute;
-                    worker.RunWorkerCompleted += RunWorkerCompleted;
-
-                    worker.RunWorkerAsync(new WorkerArgs { Problem = problem, ActionSecuence = actionSeq });
-
-                }
-                else
-                {
-                    MessageBox.Show("No solution found.");
-                }
+                MessageBox.Show("Packman not set.");
             }
+        }
+
+        #region Animating Path
+        private void ShowButtonClicked(object sender, RoutedEventArgs e)
+        {
+            if (actionSeq.Size != 0)
+            {
+                env.Show(initialState);
+
+                BackgroundWorker worker = new BackgroundWorker
+                {
+                    WorkerReportsProgress = true
+                };
+                worker.ProgressChanged += StateChanged;
+                worker.DoWork += ShowRoute;
+                worker.RunWorkerCompleted += RunWorkerCompleted;
+
+                worker.RunWorkerAsync(new WorkerArgs { ActionSecuence = actionSeq });
+            }
+            else
+            {
+                MessageBox.Show(this, "No solution found.");
+            }
+        }
+
+        private void WorkerProgressChanged(object sender, ProgressChangedEventArgs e)
+        {
+            env.Show(e.UserState as State);
         }
 
         private void RunWorkerCompleted(object sender, RunWorkerCompletedEventArgs e)
         {
-            MessageBox.Show("Routing Completed");
+            MessageBox.Show(this, "Routing Completed");
         }
 
         private class WorkerArgs
         {
-            public Problem Problem { get; set; }
             public ActionSecuence ActionSecuence { get; set; }
         }
 
         private void ShowRoute(object sender, DoWorkEventArgs e)
         {
-            Problem problem = (e.Argument as WorkerArgs).Problem;
             ActionSecuence actions = (e.Argument as WorkerArgs).ActionSecuence;
-            State current = problem.InitialState;
             var worker = sender as BackgroundWorker;
 
             Thread.Sleep(500);
             for (int i = 0; i < actions.Size; i++)
             {
-                current = problem.Result(current, actions[i]);
-                worker.ReportProgress(i, current);
+                worker.ReportProgress(i, actions[i]);
                 Thread.Sleep(500);
             }
         }
 
-        private void StateChanged(object sender, ProgressChangedEventArgs e)
+        private new void StateChanged(object sender, ProgressChangedEventArgs e)
         {
-            env.Show(e.UserState as State);
-        }
+            Actions action = (Actions)e.UserState;
 
+            switch (action)
+            {
+                case Actions.LEFT:
+                    env.Packman.Left();
+                    break;
+                case Actions.UP:
+                    env.Packman.Up();
+                    break;
+                case Actions.RIGHT:
+                    env.Packman.Right();
+                    break;
+                case Actions.DOWN:
+                    env.Packman.Down();
+                    break;
+            }
+        }
+        #endregion Animating Path
         private void ToggleButtonChecked(object sender, RoutedEventArgs e)
         {
-            env.SelectedTool = (sender as ToggleButton).Tag as EnvBlockType?;
+            env.SelectedTool = (sender as ToggleButton).Tag as EnvType?;
             selectedTool = sender as ToggleButton;
             for (int i = 0; i < 4; i++)
             {
@@ -229,8 +163,63 @@ namespace AI_P1
             if (selectedTool == sender as ToggleButton)
                 env.SelectedTool = null;
         }
-    }
 
+        private void LoadButtonClicked(object sender, RoutedEventArgs e)
+        {
+            OpenFileDialog openFile = new OpenFileDialog();
+            var status = openFile.ShowDialog(this);
+            if (status == true)
+            {
+                string path = openFile.FileName;
+                string initialState = IOHandler.LoadInitialState(path);
+                State s = new State(initialState);
+                env.Show(s);
+            }
+        }
+
+        private void SaveButtonClicked(object sender, RoutedEventArgs e)
+        {
+            SaveFileDialog saveFile = new SaveFileDialog();
+            var status = saveFile.ShowDialog(this);
+            if (status == true)
+            {
+                string path = saveFile.FileName;
+                StringWriter strWriter = new StringWriter();
+
+                for (int i = 0; i < env.RowCount; i++)
+                {
+                    for (int j = 0; j < env.ColumnCount; j++)
+                    {
+                        switch (env[i, j])
+                        {
+                            case EnvType.Wall:
+                                strWriter.Write('%');
+                                break;
+                            case EnvType.Empty:
+                                strWriter.Write(' ');
+                                break;
+                            case EnvType.Food:
+                                strWriter.Write('.');
+                                break;
+                            case EnvType.Packman:
+                                strWriter.Write('p');
+                                break;
+                        }
+                    }
+                    strWriter.Write(strWriter.NewLine);
+                }
+
+                IOHandler.SaveInitialState(path, strWriter.ToString());
+                MessageBox.Show("Problem saved successfully");
+            }
+        }
+
+        private void ResetToInitState(object sender, RoutedEventArgs e)
+        {
+            if (initialState != null)
+                env.Show(initialState);
+        }
+    }
 
     public class IntToTextConvertor : IValueConverter
     {
