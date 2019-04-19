@@ -6,24 +6,26 @@
         xmlns:local="clr-namespace:AI_P1"
         mc:Ignorable="d"
         xmlns:GUI="clr-namespace:AI_P1.gui_elements"
-        Title="MainWindow" Height="500" Width="800"
+        Title="Packman Solver" Height="500" Width="800"
         x:Name="window"
-        Background="WhiteSmoke">
+        Background="WhiteSmoke" WindowStartupLocation="CenterScreen">
     <Window.Resources>
         <local:IntToTextConvertor x:Key="intToTextConv"/>
         <local:CountToSize x:Key="cToSize"/>
     </Window.Resources>
     <Grid>
         <DockPanel Margin="10">
-            <DockPanel DockPanel.Dock="Right" Margin="10">
+            <DockPanel x:Name="controlPanel" DockPanel.Dock="Right" Margin="10">
                 <Grid DockPanel.Dock="Top">
                     <Grid.RowDefinitions>
+                        <RowDefinition/>
                         <RowDefinition/>
                         <RowDefinition/>
                     </Grid.RowDefinitions>
 
                     <Button Content="Load Problem" DockPanel.Dock="Top" Grid.Row="0" Margin="5" Click="LoadButtonClicked"/>
                     <Button Content="Save Problem" DockPanel.Dock="Top" Grid.Row="1" Margin="5" Click="SaveButtonClicked"/>
+                    <Button x:Name="resetButton" Content="Reset" Grid.Row="2" Margin="5" Click="ResetButtonClick"/>
                 </Grid>
 
                 <Separator DockPanel.Dock="Top"/>
@@ -71,8 +73,8 @@
 
                 <Separator DockPanel.Dock="Top"/>
 
-                <Button Content="Reset to Initial State" DockPanel.Dock="Bottom" Margin="5" Click="ResetToInitState"/>
-                <Button Content="Show Path" DockPanel.Dock="Bottom" Margin="5" Click="ShowButtonClicked"/>
+                <Button x:Name="resetToInitStateBtn" Content="Reset to Initial State" DockPanel.Dock="Bottom" Margin="5" Click="ResetToInitState" IsEnabled="False"/>
+                <Button x:Name="showPathBtn" Content="Show Path" DockPanel.Dock="Bottom" Margin="5" Click="ShowButtonClicked" IsEnabled="False"/>
                 <Button Content="Solve" DockPanel.Dock="Bottom" Margin="5" Click="SolveButtonClicked"/>
                 
                 <Grid DockPanel.Dock="Bottom">

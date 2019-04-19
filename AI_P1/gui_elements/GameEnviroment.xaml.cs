@@ -142,6 +142,17 @@ namespace AI_P1.gui_elements
             }
         }
 
+        public void Reset()
+        {
+            for (int i = 0; i < RowCount; i++)
+            {
+                for (int j = 0; j < ColumnCount; j++)
+                {
+                    env[i, j].Type = EnvType.Empty;
+                }
+            }
+        }
+
         #endregion
 
         #region Private Functions

@@ -21,21 +21,20 @@ ActionSequence SearchAgent::generalGraphSearch(const Problem &problem)
 
 	while (!list->empty())
 	{
-		TreeNode *front = list->pop();
+		TreeNode* front = list->pop();
+
+		if (problem.isGoal(front->getState()))
+		{
+			auto temp = extractActionSequnce(front);
+			delete list;
+			return temp;
+		}
 
 		if (!exploredStates.has(front->getState()))
 		{
+
 			exploredStates.insert(front->getState());
-			if (problem.isGoal(front->getState()))
-			{
-				auto temp = extractActionSequnce(front);
-				delete list;
-				return temp;
-			}
-			else
-			{
-				expandNode(list, problem, front, exploredStates);
-			}
+			expandNode(list, problem, front, exploredStates);
 		}
 	}
 	delete list;
@@ -55,12 +54,12 @@ ActionSequence search::SearchAgent::DFS(const Problem &problem)
 ActionSequence search::SearchAgent::extractActionSequnce(TreeNode * node)
 {
 	ActionSequence actionSec;
-	do
+
+	while (node != nullptr && node->getParent() != nullptr)
 	{
 		actionSec.addFirst(node->getAction());
 		node = node->getParent();
-	} while (node->getParent() != nullptr);
-
+	} 
 	return actionSec;
 }
 void search::SearchAgent::expandNode(List *list, const Problem &problem, TreeNode *node,
@@ -70,26 +69,22 @@ void search::SearchAgent::expandNode(List *list, const Problem &problem, TreeNod
 
 	if (problem.result(node->getState(), Actions::LEFT, result))
 	{
-		if (!exploredStates.has(result))
-			addNode(list, result, Actions::LEFT, node);
+		addNode(list, result, Actions::LEFT, node);
 	}
 
 	if (problem.result(node->getState(), Actions::UP, result))
 	{
-		if (!exploredStates.has(result))
-			addNode(list, result, Actions::UP, node);
+		addNode(list, result, Actions::UP, node);
 	}
 
 	if (problem.result(node->getState(), Actions::RIGHT, result))
 	{
-		if (!exploredStates.has(result))
-			addNode(list, result, Actions::RIGHT, node);
+		addNode(list, result, Actions::RIGHT, node);
 	}
 
 	if (problem.result(node->getState(), Actions::DOWN, result))
 	{
-		if (!exploredStates.has(result))
-			addNode(list, result, Actions::DOWN, node);
+		addNode(list, result, Actions::DOWN, node);
 	}
 }
 void search::SearchAgent::addNode(List * list, State & state, Actions action, TreeNode * parent)

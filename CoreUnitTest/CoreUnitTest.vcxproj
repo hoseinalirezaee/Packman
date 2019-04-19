@@ -26,7 +26,7 @@
     <ProjectGuid>{EFC7595E-9E53-43DC-A42B-EA8D2A1F183D}</ProjectGuid>
     <Keyword>Win32Proj</Keyword>
     <RootNamespace>AIPCore</RootNamespace>
-    <WindowsTargetPlatformVersion>10.0.17763.0</WindowsTargetPlatformVersion>
+    <WindowsTargetPlatformVersion>10.0</WindowsTargetPlatformVersion>
     <ProjectName>CoreUnitTest</ProjectName>
   </PropertyGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.Default.props" />

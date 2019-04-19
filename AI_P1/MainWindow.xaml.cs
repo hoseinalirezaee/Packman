@@ -53,6 +53,8 @@ namespace AI_P1
 
             env.RowCount = 4;
             env.ColumnCount = 6;
+
+            
         }
 
         private void SolveButtonClicked(object sender, RoutedEventArgs e)
@@ -65,7 +67,10 @@ namespace AI_P1
 
                 actionSeq = ProblemSolver.Solve(initialState, algo);
 
-                MessageBox.Show("Solved.");
+                MessageBox.Show("Done.");
+
+                resetToInitStateBtn.IsEnabled = true;
+                showPathBtn.IsEnabled = true;
             }
             else
             {
@@ -78,6 +83,7 @@ namespace AI_P1
         {
             if (actionSeq.Size != 0)
             {
+                controlPanel.IsEnabled = false;
                 env.Show(initialState);
 
                 BackgroundWorker worker = new BackgroundWorker
@@ -92,7 +98,7 @@ namespace AI_P1
             }
             else
             {
-                MessageBox.Show(this, "No solution found.");
+                MessageBox.Show(this, "No path found");
             }
         }
 
@@ -104,6 +110,7 @@ namespace AI_P1
         private void RunWorkerCompleted(object sender, RunWorkerCompletedEventArgs e)
         {
             MessageBox.Show(this, "Routing Completed");
+            controlPanel.IsEnabled = true;
         }
 
         private class WorkerArgs
@@ -218,6 +225,16 @@ namespace AI_P1
         {
             if (initialState != null)
                 env.Show(initialState);
+        }
+
+        private void ResetButtonClick(object sender, RoutedEventArgs e)
+        {
+            initialState = null;
+            actionSeq = null;
+            showPathBtn.IsEnabled = false;
+            resetToInitStateBtn.IsEnabled = false;
+
+            env.Reset();
         }
     }
 
